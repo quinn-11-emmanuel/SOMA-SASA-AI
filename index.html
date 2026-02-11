@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Soma Sasa CRAZY 🇰🇪</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+margin:0;
+font-family:Arial;
+background:#eef2f7;
+transition:.3s;
+}
+
+.dark{background:#0f172a;color:white}
+
+header{
+background:linear-gradient(90deg,#0b7a3b,#16a34a);
+color:white;
+padding:20px;
+text-align:center;
+}
+
+nav{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:8px;
+background:#064f27;
+padding:10px;
+}
+
+nav button{
+padding:10px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+}
+
+section{display:none;padding:20px;animation:fade .3s}
+.active{display:block}
+
+@keyframes fade{
+from{opacity:0;transform:translateY(10px)}
+to{opacity:1}
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:12px;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:14px;
+box-shadow:0 4px 12px rgba(0,0,0,.1);
+transition:.2s;
+}
+
+.card:hover{transform:translateY(-3px)}
+
+.dark .card{background:#1e293b}
+
+.primary{
+background:#16a34a;
+color:white;
+border:none;
+padding:10px;
+border-radius:8px;
+cursor:pointer;
+}
+
+#timer,#focusTimer{font-size:22px;color:#ef4444}
+
+#chatbox{
+height:220px;
+overflow:auto;
+background:#f1f5f9;
+padding:10px;
+border-radius:10px;
+}
+
+.dark #chatbox{background:#020617}
+
+.floatingAI{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#16a34a;
+color:white;
+border:none;
+border-radius:50%;
+width:60px;
+height:60px;
+font-size:24px;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🚀 Soma Sasa CRAZY</h1>
+<p>Kenya’s Smart Revision Platform 🇰🇪</p>
+<button onclick="toggleDark()">🌙 Mode</button>
+</header>
+
+<nav>
+<button onclick="show('home')">Home</button>
+<button onclick="show('subjects')">Subjects</button>
+<button onclick="show('planner')">Planner</button>
+<button onclick="show('quiz')">Exam Engine</button>
+<button onclick="show('focus')">Focus Timer</button>
+<button onclick="show('leaderboard')">Leaderboard</button>
+<button onclick="show('ai')">AI Buddy</button>
+</nav>
+
+<section id="home" class="active">
+<h2>Curriculum</h2>
+<div class="grid">
+<div class="card">📘 8-4-4 KCSE Revision</div>
+<div class="card">📗 CBC / CBE Learning</div>
+<div class="card">📊 Smart Analytics (Demo)</div>
+</div>
+</section>
+
+<section id="subjects">
+<h2>Subjects</h2>
+<div class="grid">
+<div class="card">➗ Mathematics</div>
+<div class="card">📖 English</div>
+<div class="card">📝 Kiswahili</div>
+<div class="card">🧬 Biology</div>
+<div class="card">⚗️ Chemistry</div>
+<div class="card">⚡ Physics</div>
+<div class="card">🌍 Geography</div>
+<div class="card">💼 Business</div>
+</div>
+</section>
+
+<section id="planner">
+<h2>Study Planner</h2>
+<input id="taskInput" placeholder="Add study task">
+<button class="primary" onclick="addTask()">Add</button>
+<ul id="taskList"></ul>
+</section>
+
+<section id="quiz">
+<h2>Smart Exam Engine</h2>
+
+<p id="timer">00:00</p>
+
+<select id="timeSelect">
+<option value="30">30 Minutes</option>
+<option value="60">1 Hour</option>
+<option value="150">2 Hours 30 Minutes</option>
+</select>
+
+<button class="primary" onclick="startQuiz()">Start Exam</button>
+
+<div class="card">
+<p id="question">Press start to generate a question</p>
+<button onclick="checkAns(1)">A</button>
+<button onclick="checkAns(2)">B</button>
+<button onclick="checkAns(3)">C</button>
+</div>
+
+<p id="score">Score:0 | 🔥Streak:0</p>
+</section>
+
+<section id="focus">
+<h2>Pomodoro Focus Timer</h2>
+<p id="focusTimer">25:00</p>
+<button class="primary" onclick="startFocus()">Start Focus</button>
+</section>
+
+<section id="leaderboard">
+<h2>Top Students</h2>
+<div class="card">🥇 Amina – 96%</div>
+<div class="card">🥈 Brian – 92%</div>
+<div class="card">🥉 Kevin – 88%</div>
+</section>
+
+<section id="ai">
+<h2>🤖 AI Study Buddy</h2>
+<div id="chatbox"></div>
+<input id="userInput" placeholder="Ask a study question...">
+<button class="primary" onclick="sendMessage()">Send</button>
+</section>
+
+<button class="floatingAI" onclick="show('ai')">🤖</button>
+
+<script>
+function show(id){
+document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+function toggleDark(){document.body.classList.toggle("dark")}
+
+/* Planner */
+function addTask(){
+let val=document.getElementById("taskInput").value;
+if(!val)return;
+let li=document.createElement("li");
+li.innerText=val;
+document.getElementById("taskList").appendChild(li);
+}
+
+/* Quiz Engine */
+let score=0,streak=0,correct=1,timeLeft,timerInterval;
+
+function startQuiz(){
+let qs=[
+["5+5=?",1],
+["10x2=?",2],
+["3+7=?",3]
+];
+let q=qs[Math.floor(Math.random()*qs.length)];
+document.getElementById("question").innerText=q[0]+" (A=10 B=20 C=10)";
+correct=q[1];
+
+let minutes=document.getElementById("timeSelect").value;
+timeLeft=minutes*60;
+clearInterval(timerInterval);
+
+timerInterval=setInterval(()=>{
+let m=Math.floor(timeLeft/60);
+let s=timeLeft%60;
+document.getElementById("timer").innerText=m+":"+(s<10?"0"+s:s);
+timeLeft--;
+if(timeLeft<0){clearInterval(timerInterval);alert("Exam finished")}
+},1000);
+}
+
+function checkAns(a){
+if(a===correct){score++;streak++}else{streak=0}
+document.getElementById("score").innerText="Score:"+score+" | 🔥Streak:"+streak;
+}
+
+/* Focus Timer */
+function startFocus(){
+let t=1500;
+setInterval(()=>{
+let m=Math.floor(t/60),s=t%60;
+document.getElementById("focusTimer").innerText=m+":"+(s<10?"0"+s:s);
+t--;
+},1000);
+}
+
+/* AI Buddy */
+function sendMessage(){
+let input=document.getElementById("userInput").value.toLowerCase();
+let chat=document.getElementById("chatbox");
+
+chat.innerHTML+="<p><b>You:</b>"+input+"</p>";
+
+let reply="Break the topic into small parts and revise daily.";
+if(input.includes("math")) reply="Practice formulas and past KCSE questions.";
+if(input.includes("exam")) reply="Use timed practice and review mistakes.";
+if(input.includes("biology")) reply="Focus on diagrams and definitions.";
+
+chat.innerHTML+="<p><b>AI:</b>"+reply+"</p>";
+chat.scrollTop=chat.scrollHeight;
+}
+</script>
+
+</body>
+</html>
